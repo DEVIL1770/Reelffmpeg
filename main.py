@@ -180,12 +180,13 @@ async def me(request: Request):
         "last_used": last_used_time
     }
 
-@app.post("/process", summary="معالجة الفيديو للمستخدمين المشتركين", dependencies=[Depends(verify_content_length)])
+@app.post("/process", summary="معالجة الفيديو للمستخدمين المشتركين")
 async def process_video(request: Request, file: UploadFile = File(...)):
     key = request.headers.get("X-KEY")
     device = request.headers.get("X-DEVICE")
     if not key or not device:
-        raise HTTPException(status_code=401, detail="FUCK OFF BITCH 🖕")
+        raise HTTPException(status_code=401, detail="المفتاح أو معرف الجهاز مطلوب")
+    
     db = load_db()
     row = find_key(db, key)
     if not row:
@@ -195,11 +196,11 @@ async def process_video(request: Request, file: UploadFile = File(...)):
 
     expires_on = calc_expiry(row.get("activated_on"), row.get("duration_days", 30))
     if not expires_on or datetime.datetime.utcnow() >= expires_on:
-        raise HTTPException(status_code=403, detail="⛔ انتهت صلاحية هذا المفتاح")
+        raise HTTPException(status_code=403, detail="انتهت صلاحية هذا المفتاح")
 
     row["last_used"] = now_iso()
     save_db(db)
-    
+
     try:
         suffix = Path(file.filename).suffix
         with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp_in:
@@ -207,11 +208,20 @@ async def process_video(request: Request, file: UploadFile = File(...)):
             tmp_in.write(contents)
             tmp_in_path = tmp_in.name
 
-        tmp_out_path = tmp_in_path.replace(suffix, f"_out{suffix}")
-        cmd = ["ffmpeg", "-itsscale", "2", "-i", tmp_in_path, "-c:v", "copy", "-c:a", "copy", tmp_out_path]
+        tmp_out_path = tmp_in_path.replace(suffix, f"_enhanced{suffix}")
+        
+        # أمر Real-ESRGAN CPU
+        cmd = [
+            "realesrgan-ncnn-vulkan",  # على Render استبدل بالنسخة CPU إذا لزم
+            "-i", tmp_in_path,
+            "-o", tmp_out_path
+        ]
         subprocess.run(cmd, check=True, capture_output=True, text=True, encoding='utf-8')
-        return FileResponse(tmp_out_path, filename=f"4tik_{file.filename}")
+
+        return FileResponse(tmp_out_path, filename=f"enhanced_{file.filename}")
+    
     except subprocess.CalledProcessError as e:
         raise HTTPException(status_code=500, detail=f"خطأ في معالجة الفيديو: {e.stderr}")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"حدث خطأ غير متوقع: {str(e)}")
+
