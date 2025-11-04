@@ -1,23 +1,24 @@
-# صورة بايثون خفيفة
+# استخدم بايثون خفيف
 FROM python:3.11-slim
 
-# تثبيت ffmpeg
-RUN apt-get update && apt-get install -y ffmpeg && rm -rf /var/lib/apt/lists/*
+# تثبيت أدوات البناء المطلوبة فقط
+RUN apt-get update && apt-get install -y build-essential git && rm -rf /var/lib/apt/lists/*
 
 # مكان العمل
 WORKDIR /app
 
-# تثبيت المتطلبات
+# نسخ ملف المتطلبات وتثبيتها
 COPY requirements.txt .
+RUN pip install --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
 
-# نسخ باقي الملفات (index.html, main.py, manifest.json, sw.js, icons…)
+# نسخ باقي ملفات المشروع (index.html, main.py, CSS, JS, Icons…)
 COPY . .
 
-# إنشاء مجلد التخزين الدائم للمفاتيح
+# إنشاء مجلد تخزين دائم للمفاتيح والملفات
 RUN mkdir -p /data
 
-# المنفذ
+# فتح المنفذ
 EXPOSE 8000
 
 # تشغيل السيرفر
