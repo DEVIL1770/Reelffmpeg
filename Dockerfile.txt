@@ -1,25 +1,18 @@
-# استخدم بايثون خفيف
 FROM python:3.11-slim
 
-# تثبيت أدوات البناء المطلوبة فقط
+# تثبيت أدوات البناء المطلوبة
 RUN apt-get update && apt-get install -y build-essential git && rm -rf /var/lib/apt/lists/*
 
-# مكان العمل
 WORKDIR /app
 
-# نسخ ملف المتطلبات وتثبيتها
 COPY requirements.txt .
-RUN pip install --upgrade pip
+RUN pip install --upgrade pip setuptools wheel
 RUN pip install --no-cache-dir -r requirements.txt
 
-# نسخ باقي ملفات المشروع (index.html, main.py, CSS, JS, Icons…)
 COPY . .
 
-# إنشاء مجلد تخزين دائم للمفاتيح والملفات
 RUN mkdir -p /data
 
-# فتح المنفذ
 EXPOSE 8000
 
-# تشغيل السيرفر
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
