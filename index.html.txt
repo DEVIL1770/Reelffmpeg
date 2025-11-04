@@ -1,0 +1,377 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#0f1320">
+  
+  <!-- ✅ الأيقونة المضافة -->
+  <link rel="icon" href="icon.ico" type="image/x-icon">
+  <link rel="shortcut icon" href="icon.ico" type="image/x-icon">
+  <link rel="apple-touch-icon" href="icon.ico">
+  
+  <title>RESIST TIK</title>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&display=swap" rel="stylesheet">
+  <style>
+    /* Global Styles & Variables */
+    :root{ --bg:#0a0b12; --ink:#f3f6fb; --muted:#aab6c5; --line:#1d2433; --c1:#25F4EE; --c2:#FE2C55; }
+    html { scroll-behavior: smooth; }
+    /* Updated Font Family to Tajawal */
+    *{ box-sizing: border-box; font-family: 'Tajawal', 'Cairo', sans-serif; }
+    /* Font size slightly reduced for better aesthetics */
+    body{ 
+      margin:0; 
+      display:flex; 
+      flex-direction:column; 
+      align-items:center; 
+      color:var(--ink); 
+      background-color: var(--bg); 
+      font-size: 16px; /* Slightly reduced base font size */
+      background-image: radial-gradient(ellipse 50vw 30vh at 15% -10%, rgba(37,244,238,.12), transparent 80%), radial-gradient(ellipse 60vw 40vh at 110% -20%, rgba(254,44,85,.12), transparent 80%), linear-gradient(180deg, #080910 0%, #0a0b12 100%); 
+    }
+    body.login-active { overflow: hidden; }
+    .topbar{ position:sticky; top:0; width:100%; display:flex; justify-content:center; align-items:center; padding:14px 16px; backdrop-filter: saturate(140%) blur(8px); background: linear-gradient(180deg, rgba(10,11,18,.75), rgba(10,11,18,0)); z-index:10; }
+    .brand{ font-weight:900; font-size:42px; letter-spacing:.6px; margin:0; background: linear-gradient(90deg, var(--c2), var(--c1), var(--c2)); -webkit-background-clip:text; background-clip:text; color:transparent; text-shadow: 0 0 18px rgba(37,244,238,.35), 0 0 18px rgba(254,44,85,.25); background-size: 200% auto; animation: shine 3s linear infinite; transition: font-size 0.3s ease; }
+    @keyframes shine { to { background-position:-200% center; } }
+    /* Wrap for content with extra bottom padding to account for fixed footer */
+    .wrap{ 
+        width: min(900px, 94vw); 
+        padding: 20px 0 100px; /* Reduced bottom padding, footer is fixed now */
+        margin-left: auto; 
+        margin-right: auto; 
+        flex-grow: 1; /* Allow content to grow */
+    }
+    .card{ background: rgba(15, 19, 32, 0.8); border: 1px solid var(--line); border-radius:18px; padding: 24px; box-shadow:0 20px 60px rgba(0,0,0,.35); margin-bottom:16px; transition: all 0.3s ease; }
+    .upload{ position:relative; border-radius:16px; padding:28px; text-align:center; cursor:pointer; background:rgba(255,255,255,.02); border:2px dashed #314055; overflow:hidden; isolation:isolate; transition: transform 0.3s ease; }
+    .upload:hover { transform: scale(1.02); }
+    .u-title{ display:inline-block; font-weight:800; font-size:22px; text-transform:uppercase; background: linear-gradient(90deg,var(--c1),var(--c2)); -webkit-background-clip:text; background-clip:text; color:transparent; transition: font-size 0.3s ease; }
+    .hint{ margin-top:6px; color:var(--muted); font-size:14px; }
+    .controls-wrap { display: flex; flex-direction: column; align-items: center; gap: 12px; margin-top: 25px; margin-bottom: 10px; }
+    .btn { display: flex; justify-content: center; align-items: center; width: 14rem; overflow: hidden; height: 3.5rem; background-size: 300% 300%; cursor: pointer; backdrop-filter: blur(1rem); border-radius: 5rem; transition: 0.5s; animation: gradient_301 5s ease infinite; border: double 4px transparent; background-image: linear-gradient(#212121, #212121), linear-gradient( 137.48deg, #ffdb3b 10%, #fe53bb 45%, #8f51ea 67%, #0044ff 87%); background-origin: border-box; background-clip: content-box, border-box; }
+    .btn .container-stars { position: absolute; z-index: -1; width: 100%; height: 100%; overflow: hidden; transition: 0.5s; backdrop-filter: blur(1rem); border-radius: 5rem; }
+    .btn strong { z-index: 2; font-size: 16px; letter-spacing: 2px; color: #ffffff; text-shadow: 0 0 4px white; font-weight: bold; }
+    .btn .glow { position: absolute; display: flex; width: 12rem; }
+    .btn .circle { width: 100%; height: 30px; filter: blur(2rem); animation: pulse_3011 4s infinite; z-index: -1; }
+    .btn .circle:nth-of-type(1) { background: rgba(254, 83, 186, 0.636); }
+    .btn .circle:nth-of-type(2) { background: rgba(142, 81, 234, 0.704); }
+    .btn:hover { transform: scale(1.1); }
+    .btn:active { border: double 4px #fe53bb; background-origin: border-box; background-clip: content-box, border-box; animation: none; }
+    .btn[disabled] { cursor: not-allowed; filter: grayscale(70%); animation: none; pointer-events: none; }
+    .bar-wrap{ height:14px; background:#0a0f1a; border:1px solid var(--line); border-radius:999px; overflow:hidden; width: 100%; }
+    .bar{ height:100%; width:0%; border-radius:999px; background:linear-gradient(90deg,var(--c2),var(--c1)); transition:width .12s; }
+    .bar.running{
+      width: 100%;
+      background: linear-gradient(90deg, var(--c2), var(--c1), var(--c2));
+      background-size: 200% auto;
+      animation: shine 2s linear infinite;
+    }
+    .status{ font-size:14px; color:var(--muted); height: 20px; }
+    
+    /* Fixed Footer - حقوق ثابتة بالأسفل */
+    .footer{ 
+      position:fixed; 
+      bottom:0; 
+      left:0; 
+      right:0; 
+      text-align:center; 
+      font-size:15px; /* Slightly reduced font size */
+      font-weight:700; 
+      color:var(--ink); 
+      display:flex; 
+      justify-content:center; 
+      align-items:center; 
+      gap:10px; 
+      z-index:20; 
+      padding: 10px 0; /* Added padding */
+      background-color: var(--bg); /* Added background to cover content underneath */
+      border-top: 1px solid var(--line); /* Subtle separator */
+    }
+    .heart{ color:var(--c2); font-size:20px; animation:beat 1s infinite; }
+    @keyframes beat{ 0%,100%{transform:scale(1)} 50%{transform:scale(1.3)} }
+    
+    /* Subscription Info and Guide Font Size Reduction */
+    .card > div:nth-child(2) div { 
+        font-size: 15px; /* Reduced font size for subscription details */
+    }
+    .card > div:nth-child(2) b {
+        font-size: 16px; /* Reduced font size for bold values */
+    }
+    ul.guide{ padding:0 20px 0 0; margin:0; line-height:1.8; font-size: 15px; /* Reduced font size for guide */ }
+
+    .login-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(10, 11, 18, 0.9); display: flex; justify-content: center; align-items: center; z-index: 1000; backdrop-filter: blur(5px); }
+    .login-overlay .login-card { background-image: linear-gradient(163deg, #00ff75 0%, #3700ff 100%); border-radius: 22px; transition: all 0.3s; max-width: 350px; width: 90%; }
+    .login-overlay .card2 { background-color: #171717; border-radius: 20px; }
+    .login-overlay .form { display: flex; flex-direction: column; gap: 10px; padding: 1.5em 2em; }
+    .login-overlay #heading { text-align: center; margin: 1em 0 2em 0; color: rgb(255, 255, 255); font-size: 1.2em; }
+    .login-overlay .field { display: flex; align-items: center; justify-content: center; gap: 0.5em; border-radius: 25px; padding: 0.6em; border: none; outline: none; color: white; background-color: #171717; box-shadow: inset 2px 5px 10px rgb(5, 5, 5); }
+    .login-overlay .input-icon { height: 1.3em; width: 1.3em; fill: white; }
+    .login-overlay .input-field { background: none; border: none; outline: none; width: 100%; color: #d3d3d3; text-align: right; }
+    .login-overlay .btn-container { display: flex; justify-content: center; margin-top: 2.5em; }
+    /* Ensure login button uses the new font */
+    .login-overlay .login-button { padding: 0.8em; width: 100%; border-radius: 5px; border: none; outline: none; transition: 0.4s ease-in-out; background-color: #252525; color: white; font-size: 1em; font-family: 'Tajawal', 'Cairo', sans-serif; cursor: pointer; }
+    .login-overlay .login-button:hover { background-color: #00ff75; color: black; }
+    .login-overlay .login-button:disabled { background-color: #555; cursor: not-allowed; }
+    .login-feedback { text-align: center; color: #FE2C55; font-size: 14px; height: 20px; margin-top: 10px; color: var(--c1); }
+  </style>
+</head>
+<body>
+  <div id="toast" style="
+    visibility: hidden;
+    min-width: 240px;
+    max-width: 95vw;
+    background: linear-gradient(90deg, #25F4EE, #FE2C55, #25F4EE);
+    color: #fff;
+    text-align: center;
+    border-radius: 10px;
+    padding: 15px 18px;
+    position: fixed;
+    z-index: 9999;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 40px;
+    font-size: 18px;
+    box-shadow: 0 4px 18px rgba(0,0,0,0.18);
+    opacity: 0;
+    transition: opacity 0.5s, bottom 0.5s;
+    direction: rtl;
+  "></div>
+
+  <div id="login-overlay" class="login-overlay">
+    <div class="login-card">
+      <div class="card2">
+        <form class="form" id="login-form">
+          <h1 class="brand" style="text-align: center; font-size: 38px; margin-bottom: 20px;">RESIST TIK</h1>
+          <p id="heading">تسجيل الدخول</p>
+          <div class="field">
+            <svg viewBox="0 0 16 16" fill="currentColor" height="16" width="16" xmlns="http://www.w3.org/2000/svg" class="input-icon"><path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"></path></svg>
+            <input type="text" class="input-field" placeholder="مفتاح الاشتراك" id="key-field" required>
+          </div>
+          <div class="btn-container">
+            <button class="login-button" type="submit">تسجيل الدخول</button>
+          </div>
+           <div id="login-feedback" class="login-feedback"></div>
+        </form>
+      </div>
+    </div>
+  </div>
+  <div id="app-content" style="display: none; width: 100%;">
+    <header class="topbar"><h1 class="brand">RESIST TIK </h1></header>
+    <main class="wrap">
+      <section class="card">
+        <div id="drop" class="upload">
+          <input id="file" type="file" accept="video/*" hidden />
+          <div class="u-title">upload video</div>
+          <div id="fileInfo" class="hint">اسحب المقطع هنا أو اضغط للاختيار</div>
+        </div>
+        <div class="controls-wrap">
+          <button type="button" id="process" class="btn" disabled><strong>معالجة</strong><div class="container-stars"><div class="stars"></div></div><div class="glow"><div class="circle"></div><div class="circle"></div></div></button>
+          <div id="status" class="status"></div>
+          <div class="bar-wrap"><div id="bar" class="bar"></div></div>
+        </div>
+      </section>
+      <section class="card">
+        <div class="row" style="justify-content: center;">
+          <button type="button" id="showSub" class="btn"><strong>تحديث اشتراكي</strong><div class="container-stars"><div class="stars"></div></div><div class="glow"><div class="circle"></div><div class="circle"></div></div></button>
+          <div id="subToast" style="font-size:13px;color:#aab6c5; flex-basis: 100%; text-align: center; margin-top: 10px;"></div>
+        </div>
+        <div style="margin-top:10px;line-height:1.9">
+          <div>المفتاح: <b id="subKey">—</b></div>
+          <div>ينتهي في: <b id="subExp">—</b></div>
+          <div>الأيام المتبقية: <b id="subDays">—</b></div>
+          <div>حالة الربط: <b id="subBind">—</b></div>
+          <div>الجهاز المربوط: <b id="subDevice">—</b></div>
+        </div>
+      </section>
+      <section class="card">
+        <h3 style="margin-top:0;color:var(--c1)">ℹ️ تعليمات مهمة</h3>
+        <ul class="guide">
+          <li>الحد الأقصى لحجم ملف الفيديو: <b>200 ميقا</b>.</li>
+          <li>بعد اكتمال معالجة الفيديو وتنزيله، افتح تطبيق <b>TikTok</b> وارفع الفيديو كـ<strong>خاص</strong>.</li>
+          <li>بعد اكتمال الرفع، يمكنك تغييره من خاص إلى <strong>عام</strong>.</li>
+        </ul>
+      </section>
+      
+      <section class="card">
+          <h3 style="margin-top:0; color:var(--c1);">📣 أعلن معنا واكسب</h3>
+        <p style="color:var(--muted); margin-bottom: 15px;">يمكنك الحصول على ايام اضافية مقابل الإعلان لخدمتنا وفق الشروط التالية:</p>
+        <ul class="guide">
+          <li>لديك حساب تكتوك نشط لايقل على 500 متابع.</li>
+          <li>اعلان قصير فديو توضيحي او نشر رابط الاشتراك.</li>
+        </ul>
+        <div style="display: flex; justify-content: center; margin-top: 25px;">
+          <a href="https://www.tiktok.com/@resist.up" target="_blank" rel="noopener noreferrer" style="text-decoration: none;">
+            <button type="button" class="btn">
+              <strong>أعلن واكسب 😍 </strong>
+              <div class="container-stars"><div class="stars"></div></div>
+              <div class="glow"><div class="circle"></div><div class="circle"></div></div>
+            </button>
+          </a>
+        </div>
+      </section>
+      </main>
+    <div class="footer">Made by RESIST <span class="heart">♥️</span></div>
+  </div>
+  <script>
+    // Toast Notification Function
+    function showToast(message, type = "info") {
+      const toast = document.getElementById("toast");
+      let bg = "linear-gradient(90deg, #25F4EE, #FE2C55, #25F4EE)";
+      if(type==="success") bg = "linear-gradient(90deg, #36d399, #25F4EE)";
+      else if(type==="error") bg = "linear-gradient(90deg, #FE2C55, #ff4444)";
+      else if(type==="warn") bg = "linear-gradient(90deg, #fbbf24, #FE2C55)";
+      toast.style.background = bg;
+      toast.textContent = message;
+      toast.style.visibility = "visible";
+      toast.style.opacity = "1";
+      toast.style.bottom = "40px";
+      clearTimeout(window.__toastTimeout);
+      window.__toastTimeout = setTimeout(() => {
+          toast.style.opacity = "0";
+          toast.style.bottom = "10px";
+          setTimeout(()=>{ toast.style.visibility = "hidden"; }, 500);
+      }, 3500);
+    }
+
+    // --- DOM Elements ---
+    const drop=document.getElementById('drop'),fileInput=document.getElementById('file'),info=document.getElementById('fileInfo'),
+    processBtn=document.getElementById('process'),bar=document.getElementById('bar'),status=document.getElementById('status'),
+    showSubBtn=document.getElementById('showSub'),subKey=document.getElementById('subKey'),
+    subExp=document.getElementById('subExp'),subDays=document.getElementById('subDays'),subBind=document.getElementById('subBind'),
+    subDevice=document.getElementById('subDevice'),subToast=document.getElementById('subToast');
+    const loginOverlay = document.getElementById('login-overlay');
+    const loginForm = document.getElementById('login-form');
+    const keyField = document.getElementById('key-field');
+    const loginFeedback = document.getElementById('login-feedback');
+    const appContent = document.getElementById('app-content');
+    // --- Helper Functions ---
+    // Using Latin/English numbers for file size (as requested)
+    const mb=n=>(n/1024/1024).toFixed(2)+' MB'; 
+    function getDeviceName(){const ua=navigator.userAgent;if(/mobile/i.test(ua)){if(/iphone|ipad|ipod/i.test(ua))return"Apple Device";if(/android/i.test(ua)){const m=ua.match(/Android\s+[\d\.]+;\s+([\w\s]+)\s+Build/i);return m&&m.length>1?m[1]:"Android Device"}}if(/windows/i.test(ua))return"Windows PC";if(/macintosh|mac os x/i.test(ua))return"Mac";return"Unknown Device"}
+    async function getDeviceID(){const s=screen,p=navigator,d=document.createElement('canvas'),t=d.getContext('webgl')||d.getContext('experimental-webgl'),n=t?t.getExtension('WEBGL_debug_renderer_info'):null,i=[p.platform,s.width+'x'+s.height,p.deviceMemory,p.hardwareConcurrency,n?t.getParameter(n.UNMASKED_VENDOR_WEBGL):'',n?t.getParameter(n.UNMASKED_RENDERER_WEBGL):''].join('|');const e=new TextEncoder().encode(i),a=await crypto.subtle.digest('SHA-256',e);return Array.from(new Uint8Array(a)).map(t=>t.toString(16).padStart(2,'0')).join('')}
+    // --- Main App Logic ---
+    function showApp() {
+        loginOverlay.style.display = 'none';
+        appContent.style.display = 'block';
+        document.body.classList.remove('login-active');
+    }
+    function showLogin(message = '') {
+        localStorage.removeItem('SUB_KEY'); // Clear key on logout/error
+        keyField.value = '';
+        loginFeedback.style.color = '#FE2C55';
+        loginFeedback.textContent = message;
+        loginOverlay.style.display = 'flex';
+        appContent.style.display = 'none';
+        document.body.classList.add('login-active');
+    }
+    // =================================================================
+    // MAIN CORRECTED FUNCTION - Using Latin numbers for dates/days
+    // =================================================================
+    async function refreshSubscriptionInfo(isAutoCheck = false) {
+      const key = localStorage.getItem('SUB_KEY');
+      if (!key) {
+        if (!isAutoCheck) showLogin('الرجاء إدخال مفتاح اشتراك صالح.');
+        return false;
+      }
+      if (!isAutoCheck) {
+          subToast.textContent = 'جاري تحديث المعلومات...';
+      }
+      try {
+        const device = await getDeviceID();
+        const res = await fetch('/me', {
+          headers: {
+            'X-KEY': key,
+            'X-DEVICE': device,
+            'X-DEVICE-NAME': getDeviceName()
+          }
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          showLogin(data.detail || 'المفتاح غير صالح أو منتهي الصلاحية');
+          showToast(data.detail || 'المفتاح غير صالح أو منتهي الصلاحية', "error");
+          return false;
+        }
+        // --- Map backend data to frontend elements ---
+        subKey.textContent = data.key_masked || '—';
+        
+        // Use 'en-US' locale for Latin/Standard numbers in date/time (as requested)
+        subExp.textContent = data.expires_on ? new Date(data.expires_on).toLocaleString('en-US', { hour12: true }) : 'غير مفعل';
+        subDays.textContent = data.days_left != null ? data.days_left.toLocaleString('en-US') : '—';
+        
+        subDevice.textContent = data.device_name || '—';
+        subBind.textContent = 'مربوط بهذا الجهاز';
+        if (!isAutoCheck) {
+            showToast('✅ تم تحديث معلومات الاشتراك بنجاح!', "success");
+            setTimeout(() => subToast.textContent = '', 2500);
+        }
+        showApp();
+        return true;
+      } catch (e) {
+        console.error("Fetch Error:", e);
+        if (!isAutoCheck) {
+            showToast('❌ فشل الاتصال بالخادم.', "error");
+            setTimeout(() => subToast.textContent = '', 2500);
+        }
+        return false;
+      }
+    }
+    // --- Event Listeners ---
+    loginForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const loginButton = e.target.querySelector('.login-button');
+        const userKey = keyField.value.trim();
+        if (!userKey) {
+            loginFeedback.style.color = '#FE2C55';
+            loginFeedback.textContent = 'الرجاء إدخال مفتاح الاشتراك.';
+            showToast('الرجاء إدخال مفتاح الاشتراك.', "warn");
+            return;
+        }
+        loginButton.disabled = true;
+        loginFeedback.style.color = 'var(--c1)';
+        loginFeedback.textContent = 'جار التحقق...';
+        localStorage.setItem('SUB_KEY', userKey);
+        const isValid = await refreshSubscriptionInfo(false);
+        if (!isValid) {
+            loginButton.disabled = false;
+        }
+    });
+    function updateInfo(){const f=fileInput.files[0];status.textContent='';if(!f){info.textContent='اسحب المقطع هنا أو اضغط للاختيار';processBtn.disabled=!0;return}
+    const MAX_SIZE=209715200;if(f.size>MAX_SIZE){info.textContent=`الملف: ${f.name}`;status.textContent=`❌ حجم الملف كبير جدًا (${mb(f.size)}). الحد الأقصى 200 MB.`;processBtn.disabled=!0;fileInput.value='';showToast(`❌ حجم الملف كبير جدًا (${mb(f.size)}). الحد الأقصى 200 MB.`, "error");return}
+    // Use the mb function which now returns Latin numbers
+    info.textContent=`الملف: ${f.name} — ${mb(f.size)}`;processBtn.disabled=!1}
+    drop.addEventListener('click',()=>fileInput.click());drop.addEventListener('dragover',e=>e.preventDefault());drop.addEventListener('drop',e=>{e.preventDefault();if(e.dataTransfer.files.length){fileInput.files=e.dataTransfer.files;updateInfo()}});fileInput.addEventListener('change',updateInfo);
+    processBtn.addEventListener('click',async()=>{const f=fileInput.files[0];if(!f)return;const key=localStorage.getItem('SUB_KEY');const device=await getDeviceID();if(!key){showLogin('انتهت الجلسة، الرجاء تسجيل الدخول مجددًا.');showToast('انتهت الجلسة، الرجاء تسجيل الدخول مجددًا.', "warn");return}status.textContent='جارٍ الرفع…';bar.classList.remove('running');bar.style.width='0%';processBtn.disabled=!0;fileInput.disabled=!0;drop.style.pointerEvents='none';drop.style.opacity='0.5';const fd=new FormData;fd.append('file',f);const xhr=new XMLHttpRequest;xhr.open('POST','/process',!0);xhr.responseType='blob';xhr.setRequestHeader('X-KEY',key);xhr.setRequestHeader('X-DEVICE',device);xhr.setRequestHeader('X-DEVICE-NAME',getDeviceName());
+    xhr.upload.onprogress=e=>{if(e.lengthComputable){bar.style.width=Math.round(e.loaded/e.total*100)+'%'}};xhr.onreadystatechange=()=>{if(xhr.readyState===XMLHttpRequest.HEADERS_RECEIVED){status.textContent='جارٍ تحسين الفيديو…';bar.classList.add('running')}};
+    xhr.onload=()=>{bar.classList.remove('running');if(xhr.status===200){status.textContent='تمّت المعالجة — يبدأ التنزيل الآن';showToast("✅ تمت معالجة الفيديو وجاهز للتنزيل!", "success");const u=URL.createObjectURL(xhr.response),a=document.createElement('a');a.href=u;a.download=`processed_${f.name}`;document.body.appendChild(a);a.click();URL.revokeObjectURL(u);a.remove();setTimeout(()=>{drop.style.pointerEvents='auto';drop.style.opacity='1';fileInput.disabled=!1;updateInfo()},800)}else{const r=new FileReader();r.onload=()=>{let m='حدث خطأ غير متوقع';try{const d=JSON.parse(r.result);m=d.detail||d.error||'المفتاح غير صالح'}catch(e){}showLogin(m);showToast(m, "error");};r.readAsText(xhr.response);drop.style.pointerEvents='auto';drop.style.opacity='1';fileInput.disabled=!1;updateInfo()}};
+    xhr.onerror=()=>{bar.classList.remove('running');status.textContent='تعذّر الاتصال.';showToast("تعذّر الاتصال بالخادم.", "error");drop.style.pointerEvents='auto';drop.style.opacity='1';fileInput.disabled=!1;updateInfo()};xhr.send(fd)});
+    showSubBtn?.addEventListener('click',()=>refreshSubscriptionInfo(false));
+    // --- Initial Load ---
+    window.addEventListener('load', async () => {
+      const keyExists = localStorage.getItem('SUB_KEY');
+      if (keyExists) {
+        const isValid = await refreshSubscriptionInfo(true);
+        if (!isValid) {
+          showLogin('المفتاح المحفوظ غير صالح، أدخل مفتاحًا جديدًا.');
+          showToast('المفتاح المحفوظ غير صالح، أدخل مفتاحًا جديدًا.', "warn");
+        }
+      } else {
+        showLogin();
+      }
+    });
+    // --- Security: Disable right-click, F12, and other dev tools ---
+    document.addEventListener('contextmenu', event => event.preventDefault());
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'C' || e.key === 'J')) || (e.ctrlKey && e.key === 'U')) {
+            e.preventDefault();
+            return false;
+        }
+    });
+    // --- Security: Disable selection and copy/paste ---
+    document.onselectstart = function() { return false; };
+    document.ondragstart = function() { return false; };
+    // --- Security: Periodic check every 5 minutes ---
+    setInterval(() => {
+        refreshSubscriptionInfo(true);
+    }, 5 * 60 * 1000);
+  </script>
+</body>
+</html>
